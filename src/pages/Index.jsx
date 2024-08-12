@@ -126,12 +126,25 @@ const Index = () => {
                       Restore
                     </Button>
                   </div>
-                  <DiffViewer
-                    oldContent={selectedEntry.content}
-                    newContent={currentContent}
-                    showAdded={true}
-                    onContentChange={handleContentChange}
-                  />
+                  <div className="relative">
+                    <DiffViewer
+                      oldContent={selectedEntry.content}
+                      newContent={currentContent}
+                      showAdded={true}
+                    />
+                    <textarea
+                      value={currentContent}
+                      onChange={(e) => handleContentChange(e.target.value)}
+                      className="absolute inset-0 w-full h-full bg-transparent resize-none outline-none"
+                      style={{
+                        fontFamily: 'inherit',
+                        fontSize: 'inherit',
+                        lineHeight: 'inherit',
+                        padding: 'inherit',
+                        whiteSpace: 'pre-wrap',
+                      }}
+                    />
+                  </div>
                 </div>
               </>
             ) : (

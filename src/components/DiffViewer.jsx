@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { diffWords } from 'diff';
 
-const DiffViewer = ({ oldContent, newContent, showRemoved = false, showAdded = false, onContentChange }) => {
+const DiffViewer = ({ oldContent, newContent, showRemoved = false, showAdded = false }) => {
   const [diff, setDiff] = useState([]);
 
   useEffect(() => {
