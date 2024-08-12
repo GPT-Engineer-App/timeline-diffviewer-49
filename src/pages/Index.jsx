@@ -27,13 +27,17 @@ const Index = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.addEventListener('scroll', syncScroll);
+      return () => textarea.removeEventListener('scroll', syncScroll);
+    }
+  }, [syncScroll]);
+
   useLayoutEffect(() => {
     syncScroll();
   }, [currentContent, syncScroll]);
-
-  const handleScroll = useCallback(() => {
-    syncScroll();
-  }, [syncScroll]);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [inputValue, setInputValue] = useState('');
   const timeoutRef = useRef(null);
@@ -154,7 +158,6 @@ const Index = () => {
                   ref={textareaRef}
                   value={currentContent}
                   onChange={(e) => handleContentChange(e.target.value)}
-                  onScroll={handleScroll}
                   className="w-full h-full resize-none outline-none p-2 font-mono text-sm leading-6"
                   style={{
                     whiteSpace: 'pre-wrap',
