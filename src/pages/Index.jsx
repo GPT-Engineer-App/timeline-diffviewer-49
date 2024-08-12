@@ -112,7 +112,7 @@ const Index = () => {
           <Timeline entries={entries} onEntrySelect={handleEntrySelect} />
         </div>
         <div className="flex-1 flex flex-col">
-          <div className="flex-1 flex">
+          <div className="flex-1 flex flex-col lg:flex-row">
             {selectedEntry && (
               <DiffViewer
                 oldContent={selectedEntry.content}

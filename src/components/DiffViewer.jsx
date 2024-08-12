@@ -11,7 +11,7 @@ const DiffViewer = ({ oldContent, newContent, onRestore }) => {
   }, [oldContent, newContent]);
 
   return (
-    <div className="flex-1 p-4 bg-gray-50 overflow-y-auto h-full flex flex-col">
+    <div className="w-full lg:w-1/2 p-4 bg-gray-50 overflow-y-auto h-full flex flex-col">
       <div className="flex justify-between items-center mb-2">
         <h3 className="text-lg font-semibold">Previous Version</h3>
         <Button onClick={() => onRestore(oldContent)} variant="outline" size="sm">
@@ -19,7 +19,7 @@ const DiffViewer = ({ oldContent, newContent, onRestore }) => {
         </Button>
       </div>
       <div className="flex-1 overflow-hidden">
-        <pre className="text-sm h-full overflow-auto">
+        <pre className="text-sm h-full overflow-auto whitespace-pre-wrap break-words">
           {diff.map((part, index) => (
             <span
               key={index}
