@@ -21,19 +21,24 @@ const Index = () => {
   const handleContentChange = (newContent) => {
     setCurrentContent(newContent);
 
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+    const lastEntry = entries[entries.length - 1];
+    const charDiff = Math.abs(newContent.length - lastEntry.content.length);
 
-    // Set a new timeout
-    timeoutRef.current = setTimeout(() => {
-      // Check if the content has changed significantly
-      const lastEntry = entries[entries.length - 1];
-      if (Math.abs(newContent.length - lastEntry.content.length) > 10) {
-        createNewEntry(newContent);
+    if (charDiff > 30) {
+      createNewEntry(newContent);
+    } else {
+      // Clear any existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
-    }, 1000);
+
+      // Set a new timeout
+      timeoutRef.current = setTimeout(() => {
+        if (newContent !== lastEntry.content) {
+          createNewEntry(newContent);
+        }
+      }, 1000);
+    }
   };
 
   const handleEntrySelect = (entry) => {
