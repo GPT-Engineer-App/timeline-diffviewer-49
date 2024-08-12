@@ -102,16 +102,16 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
-      <div className="flex flex-1">
-        <div className="hidden lg:block">
+    <div className="h-screen flex flex-col bg-gray-100">
+      <div className="flex flex-1 overflow-hidden">
+        <div className="hidden lg:block w-64 overflow-y-auto">
           <Timeline entries={entries} onEntrySelect={handleEntrySelect} />
         </div>
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 flex">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 flex overflow-hidden">
             {selectedEntry ? (
               <>
-                <div className="w-1/2 border-r p-4">
+                <div className="w-1/2 border-r p-4 overflow-y-auto">
                   <h3 className="text-lg font-semibold mb-2">Previous Version</h3>
                   <DiffViewer
                     oldContent={selectedEntry.content}
@@ -119,14 +119,14 @@ const Index = () => {
                     showRemoved={true}
                   />
                 </div>
-                <div className="w-1/2 p-4">
+                <div className="w-1/2 p-4 flex flex-col">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-lg font-semibold">Current Version</h3>
                     <Button onClick={() => handleRestore(selectedEntry.content)} variant="outline" size="sm">
                       Restore
                     </Button>
                   </div>
-                  <div className="relative bg-white shadow-md rounded-md">
+                  <div className="flex-1 relative bg-white shadow-md rounded-md overflow-hidden">
                     <DiffViewer
                       oldContent={selectedEntry.content}
                       newContent={currentContent}
@@ -141,6 +141,7 @@ const Index = () => {
                         fontSize: 'inherit',
                         lineHeight: 'inherit',
                         whiteSpace: 'pre-wrap',
+                        overflowY: 'auto',
                       }}
                     />
                   </div>
