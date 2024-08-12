@@ -129,23 +129,22 @@ const Index = () => {
                     </Button>
                   </div>
                   <div className="flex-1 relative bg-white shadow-md rounded-md overflow-hidden">
-                    <DiffViewer
-                      oldContent={selectedEntry.content}
-                      newContent={currentContent}
-                      showAdded={true}
-                    />
                     <textarea
                       value={currentContent}
                       onChange={(e) => handleContentChange(e.target.value)}
-                      className="absolute inset-0 w-full h-full bg-transparent resize-none outline-none p-2"
+                      className="w-full h-full resize-none outline-none p-2 font-mono text-sm leading-6"
                       style={{
-                        fontFamily: 'inherit',
-                        fontSize: 'inherit',
-                        lineHeight: '1.5',
                         whiteSpace: 'pre-wrap',
                         overflowY: 'auto',
                       }}
                     />
+                    <div className="absolute inset-0 pointer-events-none">
+                      <DiffViewer
+                        oldContent={selectedEntry.content}
+                        newContent={currentContent}
+                        showAdded={true}
+                      />
+                    </div>
                   </div>
                 </div>
               </>
