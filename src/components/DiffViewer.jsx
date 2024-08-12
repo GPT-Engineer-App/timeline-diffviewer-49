@@ -34,11 +34,14 @@ const DiffViewer = ({ oldContent, newContent, onRestore, onNewContentChange }) =
         </div>
       </div>
       <div className="w-full lg:w-1/2 p-4 bg-white overflow-y-auto h-full flex flex-col">
-        <h3 className="text-lg font-semibold mb-2">Current Version (Editable)</h3>
-        <Textarea
-          value={newContent}
-          onChange={(e) => onNewContentChange(e.target.value)}
-          className="flex-1 text-sm whitespace-pre-wrap"
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-lg font-semibold">Current Version (Editable)</h3>
+        </div>
+        <div
+          contentEditable
+          onInput={(e) => onNewContentChange(e.currentTarget.textContent)}
+          className="flex-1 overflow-auto text-sm whitespace-pre-wrap break-words outline-none"
+          dangerouslySetInnerHTML={{ __html: newContent }}
         />
       </div>
     </div>
