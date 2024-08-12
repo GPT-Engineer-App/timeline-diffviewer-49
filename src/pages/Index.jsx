@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Timeline from '../components/Timeline';
 import DiffViewer from '../components/DiffViewer';
 import { Button } from "@/components/ui/button";
@@ -41,24 +41,28 @@ const Index = () => {
     };
   }, [isTimelineVisible]);
 
-  const syncScroll = useCallback(() => {
-    if (textareaRef.current && overlayRef.current) {
-      overlayRef.current.scrollTop = textareaRef.current.scrollTop;
-      overlayRef.current.scrollLeft = textareaRef.current.scrollLeft;
+  useEffect(() => {
+    const handleScroll = (scrollingElement, targetElement) => {
+      targetElement.scrollTop = scrollingElement.scrollTop;
+      targetElement.scrollLeft = scrollingElement.scrollLeft;
+    };
+
+    const textarea = textareaRef.current;
+    const overlay = overlayRef.current;
+
+    if (textarea && overlay) {
+      const handleTextareaScroll = () => handleScroll(textarea, overlay);
+      const handleOverlayScroll = () => handleScroll(overlay, textarea);
+
+      textarea.addEventListener('scroll', handleTextareaScroll);
+      overlay.addEventListener('scroll', handleOverlayScroll);
+
+      return () => {
+        textarea.removeEventListener('scroll', handleTextareaScroll);
+        overlay.removeEventListener('scroll', handleOverlayScroll);
+      };
     }
   }, []);
-
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.addEventListener('scroll', syncScroll);
-      return () => textarea.removeEventListener('scroll', syncScroll);
-    }
-  }, [syncScroll]);
-
-  useLayoutEffect(() => {
-    syncScroll();
-  }, [currentContent, syncScroll]);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [inputValue, setInputValue] = useState('');
   const timeoutRef = useRef(null);
@@ -199,15 +203,21 @@ const Index = () => {
                     whiteSpace: 'pre-wrap',
                     overflowY: 'auto',
                     overflowX: 'auto',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
                   }}
                 />
                 {selectedEntry && (
                   <div 
                     ref={overlayRef}
-                    className="absolute inset-0 pointer-events-none overflow-hidden"
+                    className="absolute inset-0 pointer-events-none"
                     style={{
                       overflowY: 'auto',
                       overflowX: 'auto',
+                      zIndex: 10,
                     }}
                   >
                     <DiffViewer
