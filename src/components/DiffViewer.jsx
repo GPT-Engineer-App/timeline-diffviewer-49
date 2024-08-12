@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { diffChars } from 'diff';
+import { diffWords } from 'diff';
 import { Button } from "@/components/ui/button";
 
 const DiffViewer = ({ oldContent, newContent, onRestore }) => {
   const [diff, setDiff] = useState([]);
 
   useEffect(() => {
-    const diffResult = diffChars(oldContent, newContent);
+    const diffResult = diffWords(oldContent, newContent);
     setDiff(diffResult);
   }, [oldContent, newContent]);
 
