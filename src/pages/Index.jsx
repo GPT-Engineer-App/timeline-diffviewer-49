@@ -42,19 +42,24 @@ const Index = () => {
   }, [isTimelineVisible]);
 
   useEffect(() => {
+    const handleScroll = (scrollingElement, targetElement) => {
+      targetElement.scrollTop = scrollingElement.scrollTop;
+      targetElement.scrollLeft = scrollingElement.scrollLeft;
+    };
+
     const textarea = textareaRef.current;
     const overlay = overlayRef.current;
 
     if (textarea && overlay) {
-      const handleScroll = () => {
-        overlay.scrollTop = textarea.scrollTop;
-        overlay.scrollLeft = textarea.scrollLeft;
-      };
+      const handleTextareaScroll = () => handleScroll(textarea, overlay);
+      const handleOverlayScroll = () => handleScroll(overlay, textarea);
 
-      textarea.addEventListener('scroll', handleScroll);
+      textarea.addEventListener('scroll', handleTextareaScroll);
+      overlay.addEventListener('scroll', handleOverlayScroll);
 
       return () => {
-        textarea.removeEventListener('scroll', handleScroll);
+        textarea.removeEventListener('scroll', handleTextareaScroll);
+        overlay.removeEventListener('scroll', handleOverlayScroll);
       };
     }
   }, []);
@@ -189,27 +194,32 @@ const Index = () => {
                 )}
               </div>
               <div className="flex-1 relative bg-white shadow-md rounded-md overflow-hidden">
-                <div className="relative w-full h-full">
-                  <textarea
-                    ref={textareaRef}
-                    value={currentContent}
-                    onChange={(e) => handleContentChange(e.target.value)}
-                    className="w-full h-full resize-none outline-none p-2 font-mono text-sm leading-6"
+                <textarea
+                  ref={textareaRef}
+                  value={currentContent}
+                  onChange={(e) => handleContentChange(e.target.value)}
+                  className="w-full h-full resize-none outline-none p-2 font-mono text-sm leading-6"
+                  style={{
+                    whiteSpace: 'pre-wrap',
+                    overflowY: 'auto',
+                    overflowX: 'auto',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                  }}
+                />
+                {selectedEntry && (
+                  <div 
+                    ref={overlayRef}
+                    className="absolute inset-0 pointer-events-none"
                     style={{
-                      whiteSpace: 'pre-wrap',
-                      overflowY: 'scroll',
-                      overflowX: 'scroll',
+                      overflowY: 'auto',
+                      overflowX: 'auto',
+                      zIndex: 10,
                     }}
-                  />
-                  {selectedEntry && (
-                    <div 
-                      ref={overlayRef}
-                      className="absolute inset-0 pointer-events-none"
-                      style={{
-                        overflowY: 'hidden',
-                        overflowX: 'hidden',
-                      }}
-                    >
+                  >
                     <DiffViewer
                       oldContent={selectedEntry.content}
                       newContent={currentContent}
@@ -236,8 +246,7 @@ const Index = () => {
         </div>
       </div>
     </div>
-  </div>
-);
-}
+  );
+};
 
 export default Index;
