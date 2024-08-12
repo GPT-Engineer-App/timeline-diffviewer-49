@@ -10,8 +10,8 @@ const DiffViewer = ({ oldContent, newContent }) => {
   }, [oldContent, newContent]);
 
   return (
-    <div className="flex-1 p-4 bg-gray-50 overflow-y-auto">
-      <pre className="text-sm">
+    <div className="flex-1 p-4 bg-gray-50 overflow-y-auto h-full">
+      <pre className="text-sm h-full">
         {diff.map((part, index) => (
           <span
             key={index}

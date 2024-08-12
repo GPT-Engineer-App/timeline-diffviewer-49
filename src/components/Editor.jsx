@@ -2,7 +2,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 const Editor = ({ content, onChange }) => {
   return (
-    <div className="flex-1 p-4">
+    <div className="flex-1 p-4 h-full">
       <Textarea
         value={content}
         onChange={(e) => onChange(e.target.value)}
