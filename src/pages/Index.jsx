@@ -10,11 +10,11 @@ const Index = () => {
   const [entries, setEntries] = useState(() => {
     const savedEntries = localStorage.getItem('timelineEntries');
     return savedEntries ? JSON.parse(savedEntries) : [
-      { id: 1, timestamp: new Date().toISOString(), content: 'Initial content' }
+      { id: 1, timestamp: new Date().toISOString(), content: '' }
     ];
   });
   const [currentContent, setCurrentContent] = useState(() => {
-    return localStorage.getItem('currentContent') || 'Initial content';
+    return localStorage.getItem('currentContent') || '';
   });
   const [selectedEntry, setSelectedEntry] = useState(null);
   const timeoutRef = useRef(null);
