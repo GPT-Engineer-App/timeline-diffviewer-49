@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import Timeline from '../components/Timeline';
 import DiffViewer from '../components/DiffViewer';
-import { formatDistanceToNow } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -16,11 +15,20 @@ const Index = () => {
   const textareaRef = useRef(null);
   const overlayRef = useRef(null);
 
-  const handleScroll = useCallback(() => {
+  const syncScroll = useCallback(() => {
     if (textareaRef.current && overlayRef.current) {
       overlayRef.current.scrollTop = textareaRef.current.scrollTop;
+      overlayRef.current.scrollLeft = textareaRef.current.scrollLeft;
     }
   }, []);
+
+  useLayoutEffect(() => {
+    syncScroll();
+  }, [currentContent, syncScroll]);
+
+  const handleScroll = useCallback(() => {
+    syncScroll();
+  }, [syncScroll]);
   const [currentContent, setCurrentContent] = useState(() => {
     return localStorage.getItem('currentContent') || '';
   });
@@ -149,12 +157,17 @@ const Index = () => {
                   style={{
                     whiteSpace: 'pre-wrap',
                     overflowY: 'auto',
+                    overflowX: 'auto',
                   }}
                 />
                 {selectedEntry && (
                   <div 
                     ref={overlayRef}
                     className="absolute inset-0 pointer-events-none overflow-hidden"
+                    style={{
+                      overflowY: 'auto',
+                      overflowX: 'auto',
+                    }}
                   >
                     <DiffViewer
                       oldContent={selectedEntry.content}
