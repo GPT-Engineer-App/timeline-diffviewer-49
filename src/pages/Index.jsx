@@ -4,6 +4,7 @@ import DiffViewer from '../components/DiffViewer';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { Menu } from "lucide-react";
 
 const Index = () => {
   const [currentContent, setCurrentContent] = useState(() => {
@@ -16,6 +17,12 @@ const Index = () => {
       { id: 1, timestamp: new Date().toISOString(), content: currentContent }
     ];
   });
+
+  const [isTimelineVisible, setIsTimelineVisible] = useState(false);
+
+  const toggleTimeline = () => {
+    setIsTimelineVisible(!isTimelineVisible);
+  };
 
   const textareaRef = useRef(null);
   const overlayRef = useRef(null);
@@ -127,10 +134,18 @@ const Index = () => {
   return (
     <div className="h-screen flex flex-col bg-gray-100">
       <div className="flex flex-1 overflow-hidden">
+        <div className={`lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-white transform ${isTimelineVisible ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out`}>
+          <Timeline entries={entries} onEntrySelect={handleEntrySelect} />
+        </div>
         <div className="hidden lg:block w-64 overflow-y-auto">
           <Timeline entries={entries} onEntrySelect={handleEntrySelect} />
         </div>
         <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="lg:hidden p-4">
+            <Button onClick={toggleTimeline} variant="outline" size="icon">
+              <Menu className="h-4 w-4" />
+            </Button>
+          </div>
           <div className="flex-1 flex overflow-hidden">
             {selectedEntry && (
               <div className="w-1/2 border-r p-4 overflow-y-auto">
