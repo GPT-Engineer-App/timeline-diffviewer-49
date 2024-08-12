@@ -118,55 +118,53 @@ const Index = () => {
         </div>
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 flex overflow-hidden">
-            {selectedEntry ? (
-              <>
-                <div className="w-1/2 border-r p-4 overflow-y-auto">
-                  <h3 className="text-lg font-semibold mb-4">Previous Version</h3>
-                  <div className="bg-white shadow-md rounded-md overflow-hidden">
+            {selectedEntry && (
+              <div className="w-1/2 border-r p-4 overflow-y-auto">
+                <h3 className="text-lg font-semibold mb-4">Previous Version</h3>
+                <div className="bg-white shadow-md rounded-md overflow-hidden">
+                  <DiffViewer
+                    oldContent={selectedEntry.content}
+                    newContent={currentContent}
+                    showRemoved={true}
+                  />
+                </div>
+              </div>
+            )}
+            <div className={`${selectedEntry ? 'w-1/2' : 'w-full'} p-4 flex flex-col`}>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Current Version</h3>
+                {selectedEntry && (
+                  <Button onClick={() => handleRestore(selectedEntry.content)} variant="outline" size="sm">
+                    Restore
+                  </Button>
+                )}
+              </div>
+              <div className="flex-1 relative bg-white shadow-md rounded-md overflow-hidden">
+                <textarea
+                  ref={textareaRef}
+                  value={currentContent}
+                  onChange={(e) => handleContentChange(e.target.value)}
+                  onScroll={handleScroll}
+                  className="w-full h-full resize-none outline-none p-2 font-mono text-sm leading-6"
+                  style={{
+                    whiteSpace: 'pre-wrap',
+                    overflowY: 'auto',
+                  }}
+                />
+                {selectedEntry && (
+                  <div 
+                    ref={overlayRef}
+                    className="absolute inset-0 pointer-events-none overflow-hidden"
+                  >
                     <DiffViewer
                       oldContent={selectedEntry.content}
                       newContent={currentContent}
-                      showRemoved={true}
+                      showAdded={true}
                     />
                   </div>
-                </div>
-                <div className="w-1/2 p-4 flex flex-col">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold">Current Version</h3>
-                    <Button onClick={() => handleRestore(selectedEntry.content)} variant="outline" size="sm">
-                      Restore
-                    </Button>
-                  </div>
-                  <div className="flex-1 relative bg-white shadow-md rounded-md overflow-hidden">
-                    <textarea
-                      ref={textareaRef}
-                      value={currentContent}
-                      onChange={(e) => handleContentChange(e.target.value)}
-                      onScroll={handleScroll}
-                      className="w-full h-full resize-none outline-none p-2 font-mono text-sm leading-6"
-                      style={{
-                        whiteSpace: 'pre-wrap',
-                        overflowY: 'auto',
-                      }}
-                    />
-                    <div 
-                      ref={overlayRef}
-                      className="absolute inset-0 pointer-events-none overflow-hidden"
-                    >
-                      <DiffViewer
-                        oldContent={selectedEntry.content}
-                        newContent={currentContent}
-                        showAdded={true}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="p-4">
-                <p>Select an entry from the timeline to view changes.</p>
+                )}
               </div>
-            )}
+            </div>
           </div>
           <form onSubmit={handleSubmit} className="p-4 bg-white border-t">
             <div className="flex space-x-2">
