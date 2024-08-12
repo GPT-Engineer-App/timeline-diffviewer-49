@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import Timeline from '../components/Timeline';
-import Editor from '../components/Editor';
 import DiffViewer from '../components/DiffViewer';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,12 +51,10 @@ const Index = () => {
     if (charDiff > 30) {
       createNewEntry(newContent);
     } else {
-      // Clear any existing timeout
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
 
-      // Set a new timeout
       timeoutRef.current = setTimeout(() => {
         if (newContent !== lastEntry.content) {
           createNewEntry(newContent);
@@ -70,7 +67,6 @@ const Index = () => {
     setSelectedEntry(entry);
   };
 
-  // Cleanup effect
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -112,15 +108,19 @@ const Index = () => {
           <Timeline entries={entries} onEntrySelect={handleEntrySelect} />
         </div>
         <div className="flex-1 flex flex-col">
-          <div className="flex-1 flex flex-col lg:flex-row">
-            {selectedEntry && (
+          <div className="flex-1">
+            {selectedEntry ? (
               <DiffViewer
                 oldContent={selectedEntry.content}
                 newContent={currentContent}
                 onRestore={handleRestore}
+                onNewContentChange={handleContentChange}
               />
+            ) : (
+              <div className="p-4">
+                <p>Select an entry from the timeline to view changes.</p>
+              </div>
             )}
-            <Editor content={currentContent} onChange={handleContentChange} />
           </div>
           <form onSubmit={handleSubmit} className="p-4 bg-white border-t">
             <div className="flex space-x-2">
