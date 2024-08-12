@@ -112,15 +112,17 @@ const Index = () => {
             {selectedEntry ? (
               <>
                 <div className="w-1/2 border-r p-4 overflow-y-auto">
-                  <h3 className="text-lg font-semibold mb-2">Previous Version</h3>
-                  <DiffViewer
-                    oldContent={selectedEntry.content}
-                    newContent={currentContent}
-                    showRemoved={true}
-                  />
+                  <h3 className="text-lg font-semibold mb-4">Previous Version</h3>
+                  <div className="bg-white shadow-md rounded-md overflow-hidden">
+                    <DiffViewer
+                      oldContent={selectedEntry.content}
+                      newContent={currentContent}
+                      showRemoved={true}
+                    />
+                  </div>
                 </div>
                 <div className="w-1/2 p-4 flex flex-col">
-                  <div className="flex justify-between items-center mb-2">
+                  <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold">Current Version</h3>
                     <Button onClick={() => handleRestore(selectedEntry.content)} variant="outline" size="sm">
                       Restore
