@@ -111,22 +111,22 @@ const Index = () => {
           <div className="flex-1 flex">
             {selectedEntry ? (
               <>
-                <div className="w-1/2 border-r">
-                  <h3 className="text-lg font-semibold p-4">Previous Version</h3>
+                <div className="w-1/2 border-r p-4">
+                  <h3 className="text-lg font-semibold mb-2">Previous Version</h3>
                   <DiffViewer
                     oldContent={selectedEntry.content}
                     newContent={currentContent}
                     showRemoved={true}
                   />
                 </div>
-                <div className="w-1/2">
-                  <div className="flex justify-between items-center p-4">
+                <div className="w-1/2 p-4">
+                  <div className="flex justify-between items-center mb-2">
                     <h3 className="text-lg font-semibold">Current Version</h3>
                     <Button onClick={() => handleRestore(selectedEntry.content)} variant="outline" size="sm">
                       Restore
                     </Button>
                   </div>
-                  <div className="relative">
+                  <div className="relative bg-white shadow-md rounded-md">
                     <DiffViewer
                       oldContent={selectedEntry.content}
                       newContent={currentContent}
@@ -135,12 +135,11 @@ const Index = () => {
                     <textarea
                       value={currentContent}
                       onChange={(e) => handleContentChange(e.target.value)}
-                      className="absolute inset-0 w-full h-full bg-transparent resize-none outline-none"
+                      className="absolute inset-0 w-full h-full bg-transparent resize-none outline-none p-2"
                       style={{
                         fontFamily: 'inherit',
                         fontSize: 'inherit',
                         lineHeight: 'inherit',
-                        padding: 'inherit',
                         whiteSpace: 'pre-wrap',
                       }}
                     />

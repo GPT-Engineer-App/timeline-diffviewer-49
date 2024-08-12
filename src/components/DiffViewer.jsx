@@ -10,14 +10,14 @@ const DiffViewer = ({ oldContent, newContent, showRemoved = false, showAdded = f
   }, [oldContent, newContent]);
 
   return (
-    <div className="w-full h-full p-4 overflow-y-auto">
-      <pre className="text-sm whitespace-pre-wrap break-words">
+    <div className="w-full h-full overflow-y-auto">
+      <pre className="text-sm whitespace-pre-wrap break-words p-2">
         {diff.map((part, index) => {
           if (part.added && showAdded) {
-            return <span key={index} className="text-green-600">{part.value}</span>;
+            return <span key={index} className="bg-green-200 bg-opacity-50">{part.value}</span>;
           }
           if (part.removed && showRemoved) {
-            return <span key={index} className="text-red-600">{part.value}</span>;
+            return <span key={index} className="bg-red-200 bg-opacity-50">{part.value}</span>;
           }
           if (!part.added && !part.removed) {
             return <span key={index}>{part.value}</span>;
