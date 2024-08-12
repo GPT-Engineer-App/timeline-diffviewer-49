@@ -141,7 +141,7 @@ const Index = () => {
                       style={{
                         fontFamily: 'inherit',
                         fontSize: 'inherit',
-                        lineHeight: 'inherit',
+                        lineHeight: '1.5',
                         whiteSpace: 'pre-wrap',
                         overflowY: 'auto',
                       }}

@@ -11,7 +11,7 @@ const DiffViewer = ({ oldContent, newContent, showRemoved = false, showAdded = f
 
   return (
     <div className="w-full h-full overflow-y-auto">
-      <pre className="text-sm whitespace-pre-wrap break-words p-2">
+      <pre className="text-sm whitespace-pre-wrap break-words p-2 leading-6">
         {diff.map((part, index) => {
           if (part.added && showAdded) {
             return <span key={index} className="bg-green-200 bg-opacity-50">{part.value}</span>;
