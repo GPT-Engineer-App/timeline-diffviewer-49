@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [entries, setEntries] = useState(() => {
@@ -20,6 +21,16 @@ const Index = () => {
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [inputValue, setInputValue] = useState('');
   const timeoutRef = useRef(null);
+  const { toast } = useToast();
+
+  const handleRestore = (content) => {
+    setCurrentContent(content);
+    createNewEntry(content);
+    toast({
+      title: "Content Restored",
+      description: "The selected version has been restored.",
+    });
+  };
 
   const createNewEntry = (newContent) => {
     const newEntries = [
@@ -122,6 +133,7 @@ const Index = () => {
               <DiffViewer
                 oldContent={selectedEntry.content}
                 newContent={currentContent}
+                onRestore={handleRestore}
               />
             )}
             <Editor content={currentContent} onChange={handleContentChange} />
