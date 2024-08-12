@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { diffLines, formatLines } from 'unidiff';
+import { diffChars } from 'diff';
 import { Button } from "@/components/ui/button";
 
 const DiffViewer = ({ oldContent, newContent, onRestore }) => {
   const [diff, setDiff] = useState([]);
 
   useEffect(() => {
-    const diffResult = diffLines(oldContent, newContent);
+    const diffResult = diffChars(oldContent, newContent);
     setDiff(diffResult);
   }, [oldContent, newContent]);
 
