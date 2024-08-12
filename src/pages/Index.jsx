@@ -108,14 +108,32 @@ const Index = () => {
           <Timeline entries={entries} onEntrySelect={handleEntrySelect} />
         </div>
         <div className="flex-1 flex flex-col">
-          <div className="flex-1">
+          <div className="flex-1 flex">
             {selectedEntry ? (
-              <DiffViewer
-                oldContent={selectedEntry.content}
-                newContent={currentContent}
-                onRestore={handleRestore}
-                onNewContentChange={handleContentChange}
-              />
+              <>
+                <div className="w-1/2 border-r">
+                  <h3 className="text-lg font-semibold p-4">Previous Version</h3>
+                  <DiffViewer
+                    oldContent={selectedEntry.content}
+                    newContent={currentContent}
+                    showRemoved={true}
+                  />
+                </div>
+                <div className="w-1/2">
+                  <div className="flex justify-between items-center p-4">
+                    <h3 className="text-lg font-semibold">Current Version</h3>
+                    <Button onClick={() => handleRestore(selectedEntry.content)} variant="outline" size="sm">
+                      Restore
+                    </Button>
+                  </div>
+                  <DiffViewer
+                    oldContent={selectedEntry.content}
+                    newContent={currentContent}
+                    showAdded={true}
+                    onContentChange={handleContentChange}
+                  />
+                </div>
+              </>
             ) : (
               <div className="p-4">
                 <p>Select an entry from the timeline to view changes.</p>
