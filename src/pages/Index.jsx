@@ -131,6 +131,7 @@ const Index = () => {
                     newContent={currentContent}
                     showAdded={true}
                     onContentChange={handleContentChange}
+                    isEditable={true}
                   />
                 </div>
               </>
