@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Timeline from '../components/Timeline';
 import DiffViewer from '../components/DiffViewer';
+import { formatDistanceToNow } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -12,6 +13,14 @@ const Index = () => {
       { id: 1, timestamp: new Date().toISOString(), content: '' }
     ];
   });
+  const textareaRef = useRef(null);
+  const overlayRef = useRef(null);
+
+  const handleScroll = useCallback(() => {
+    if (textareaRef.current && overlayRef.current) {
+      overlayRef.current.scrollTop = textareaRef.current.scrollTop;
+    }
+  }, []);
   const [currentContent, setCurrentContent] = useState(() => {
     return localStorage.getItem('currentContent') || '';
   });
@@ -130,15 +139,20 @@ const Index = () => {
                   </div>
                   <div className="flex-1 relative bg-white shadow-md rounded-md overflow-hidden">
                     <textarea
+                      ref={textareaRef}
                       value={currentContent}
                       onChange={(e) => handleContentChange(e.target.value)}
+                      onScroll={handleScroll}
                       className="w-full h-full resize-none outline-none p-2 font-mono text-sm leading-6"
                       style={{
                         whiteSpace: 'pre-wrap',
                         overflowY: 'auto',
                       }}
                     />
-                    <div className="absolute inset-0 pointer-events-none">
+                    <div 
+                      ref={overlayRef}
+                      className="absolute inset-0 pointer-events-none overflow-hidden"
+                    >
                       <DiffViewer
                         oldContent={selectedEntry.content}
                         newContent={currentContent}
