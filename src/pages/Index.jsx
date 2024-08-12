@@ -119,9 +119,13 @@ const Index = () => {
     };
   }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, isRewrite = false) => {
     e.preventDefault();
     try {
+      const prompt = isRewrite
+        ? `Rewrite the following text:\n\n${currentContent}`
+        : `${currentContent}\n\nUser: ${inputValue}`;
+
       const response = await fetch('https://jyltskwmiwqthebrpzxt.supabase.co/functions/v1/llm', {
         method: 'POST',
         headers: {
@@ -130,7 +134,7 @@ const Index = () => {
         },
         body: JSON.stringify({
           messages: [
-            { role: "user", content: `${currentContent}\n\nUser: ${inputValue}` }
+            { role: "user", content: prompt }
           ]
         }),
       });
@@ -220,12 +224,13 @@ const Index = () => {
             <div className="flex space-x-2">
               <Input
                 type="text"
-                placeholder="Enter your question..."
+                placeholder="Enter your question or prompt..."
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 className="flex-1"
               />
-              <Button type="submit">Submit</Button>
+              <Button type="submit">Ask</Button>
+              <Button type="button" onClick={(e) => handleSubmit(e, true)}>Rewrite</Button>
             </div>
           </form>
         </div>
