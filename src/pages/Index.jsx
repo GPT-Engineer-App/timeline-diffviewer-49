@@ -6,12 +6,17 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
+  const [currentContent, setCurrentContent] = useState(() => {
+    return localStorage.getItem('currentContent') || '';
+  });
+
   const [entries, setEntries] = useState(() => {
     const savedEntries = localStorage.getItem('timelineEntries');
     return savedEntries ? JSON.parse(savedEntries) : [
-      { id: 1, timestamp: new Date().toISOString(), content: '' }
+      { id: 1, timestamp: new Date().toISOString(), content: currentContent }
     ];
   });
+
   const textareaRef = useRef(null);
   const overlayRef = useRef(null);
 
@@ -29,9 +34,6 @@ const Index = () => {
   const handleScroll = useCallback(() => {
     syncScroll();
   }, [syncScroll]);
-  const [currentContent, setCurrentContent] = useState(() => {
-    return localStorage.getItem('currentContent') || '';
-  });
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [inputValue, setInputValue] = useState('');
   const timeoutRef = useRef(null);
