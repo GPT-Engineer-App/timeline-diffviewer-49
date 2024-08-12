@@ -1,20 +1,30 @@
 import { Button } from "@/components/ui/button";
-import { formatDistanceToNow } from 'date-fns';
+import { differenceInSeconds, differenceInMinutes, differenceInHours } from 'date-fns';
 
 const Timeline = ({ entries, onEntrySelect }) => {
   const formatRelativeTime = (timestamp) => {
-    const distance = formatDistanceToNow(new Date(timestamp), { addSuffix: true });
-    if (distance.includes('less than a minute')) {
-      return 'just now';
+    const now = new Date();
+    const date = new Date(timestamp);
+    const secondsDiff = differenceInSeconds(now, date);
+    const minutesDiff = differenceInMinutes(now, date);
+    const hoursDiff = differenceInHours(now, date);
+
+    if (secondsDiff < 60) {
+      return `${secondsDiff}s ago`;
+    } else if (minutesDiff < 60) {
+      return `${minutesDiff}m ago`;
+    } else if (hoursDiff < 24) {
+      return `${hoursDiff}h ago`;
+    } else {
+      return date.toLocaleDateString();
     }
-    return distance;
   };
 
   return (
     <div className="w-full h-full bg-white lg:border-r border-gray-200 p-4">
       <h2 className="text-lg font-semibold mb-4">Timeline</h2>
       <div className="space-y-2 overflow-y-auto h-[calc(100%-2rem)]">
-        {entries.map((entry) => (
+        {entries.slice().reverse().map((entry) => (
           <Button
             key={entry.id}
             variant="ghost"
