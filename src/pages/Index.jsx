@@ -26,6 +26,20 @@ const Index = () => {
 
   const textareaRef = useRef(null);
   const overlayRef = useRef(null);
+  const sidebarRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target) && isTimelineVisible) {
+        setIsTimelineVisible(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isTimelineVisible]);
 
   const syncScroll = useCallback(() => {
     if (textareaRef.current && overlayRef.current) {
@@ -134,7 +148,10 @@ const Index = () => {
   return (
     <div className="h-screen flex flex-col bg-gray-100">
       <div className="flex flex-1 overflow-hidden">
-        <div className={`lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-white transform ${isTimelineVisible ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out`}>
+        <div 
+          ref={sidebarRef}
+          className={`lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-white transform ${isTimelineVisible ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out`}
+        >
           <Timeline entries={entries} onEntrySelect={handleEntrySelect} />
         </div>
         <div className="hidden lg:block w-64 overflow-y-auto">
