@@ -5,6 +5,7 @@ import DiffViewer from '../components/DiffViewer';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 const Index = () => {
   const [entries, setEntries] = useState(() => {
@@ -17,6 +18,7 @@ const Index = () => {
     return localStorage.getItem('currentContent') || '';
   });
   const [selectedEntry, setSelectedEntry] = useState(null);
+  const [inputValue, setInputValue] = useState('');
   const timeoutRef = useRef(null);
 
   const createNewEntry = (newContent) => {
@@ -68,6 +70,32 @@ const Index = () => {
     };
   }, []);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('https://jyltskwmiwqthebrpzxt.supabase.co/functions/v1/llm', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5bHRza3dtaXdxdGhlYnJwenh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjIxNTA2NjIsImV4cCI6MjAzNzcyNjY2Mn0.a1y6NavG5JxoGJCNrAckAKMvUDaXAmd2Ny0vMvz-7Ng',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            { role: "user", content: `${currentContent}\n\nUser: ${inputValue}` }
+          ]
+        }),
+      });
+      const data = await response.json();
+      if (data.content && data.content[0] && data.content[0].text) {
+        setCurrentContent(data.content[0].text);
+        createNewEntry(data.content[0].text);
+      }
+    } catch (error) {
+      console.error('Error calling LLM API:', error);
+    }
+    setInputValue('');
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <div className="flex justify-between items-center p-4">
@@ -88,14 +116,28 @@ const Index = () => {
         <div className="hidden lg:block">
           <Timeline entries={entries} onEntrySelect={handleEntrySelect} />
         </div>
-        <div className="flex-1 flex">
-          {selectedEntry && (
-            <DiffViewer
-              oldContent={selectedEntry.content}
-              newContent={currentContent}
-            />
-          )}
-          <Editor content={currentContent} onChange={handleContentChange} />
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex">
+            {selectedEntry && (
+              <DiffViewer
+                oldContent={selectedEntry.content}
+                newContent={currentContent}
+              />
+            )}
+            <Editor content={currentContent} onChange={handleContentChange} />
+          </div>
+          <form onSubmit={handleSubmit} className="p-4 bg-white border-t">
+            <div className="flex space-x-2">
+              <Input
+                type="text"
+                placeholder="Enter your question..."
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                className="flex-1"
+              />
+              <Button type="submit">Submit</Button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
