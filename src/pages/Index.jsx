@@ -12,7 +12,6 @@ const Index = () => {
       { id: 1, timestamp: new Date().toISOString(), content: '' }
     ];
   });
-  const [isEditing, setIsEditing] = useState(false);
   const [currentContent, setCurrentContent] = useState(() => {
     return localStorage.getItem('currentContent') || '';
   });
@@ -123,22 +122,15 @@ const Index = () => {
                 <div className="w-1/2">
                   <div className="flex justify-between items-center p-4">
                     <h3 className="text-lg font-semibold">Current Version</h3>
-                    <div>
-                      <Button onClick={() => handleRestore(selectedEntry.content)} variant="outline" size="sm" className="mr-2">
-                        Restore
-                      </Button>
-                      <Button onClick={() => setIsEditing(!isEditing)} variant="outline" size="sm">
-                        {isEditing ? "View Diff" : "Edit"}
-                      </Button>
-                    </div>
+                    <Button onClick={() => handleRestore(selectedEntry.content)} variant="outline" size="sm">
+                      Restore
+                    </Button>
                   </div>
                   <DiffViewer
                     oldContent={selectedEntry.content}
                     newContent={currentContent}
                     showAdded={true}
                     onContentChange={handleContentChange}
-                    isEditable={isEditing}
-                    showDiff={!isEditing}
                   />
                 </div>
               </>
