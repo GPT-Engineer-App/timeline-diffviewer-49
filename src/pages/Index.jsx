@@ -3,8 +3,6 @@ import Timeline from '../components/Timeline';
 import Editor from '../components/Editor';
 import DiffViewer from '../components/DiffViewer';
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -109,20 +107,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
-      <div className="flex justify-between items-center p-4">
-        <h1 className="text-3xl font-bold">VSCode Timeline Feature</h1>
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="outline" className="lg:hidden">
-              <Clock className="h-4 w-4 mr-2" />
-              Timeline
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left">
-            <Timeline entries={entries} onEntrySelect={handleEntrySelect} />
-          </SheetContent>
-        </Sheet>
-      </div>
       <div className="flex flex-1">
         <div className="hidden lg:block">
           <Timeline entries={entries} onEntrySelect={handleEntrySelect} />
