@@ -16,7 +16,7 @@ const Index = () => {
       const sharedData = params.get('sharedData');
       if (sharedData) {
         try {
-          const decodedData = JSON.parse(atob(sharedData));
+          const decodedData = JSON.parse(decodeURIComponent(sharedData));
           setCurrentContent(decodedData.currentContent);
           setEntries(decodedData.entries);
           localStorage.setItem('currentContent', decodedData.currentContent);
@@ -44,7 +44,7 @@ const Index = () => {
       currentContent,
       entries
     };
-    const encodedData = btoa(JSON.stringify(dataToShare));
+    const encodedData = encodeURIComponent(JSON.stringify(dataToShare));
     const shareUrl = `${window.location.origin}${window.location.pathname}?sharedData=${encodedData}`;
     navigator.clipboard.writeText(shareUrl).then(() => {
       toast({
