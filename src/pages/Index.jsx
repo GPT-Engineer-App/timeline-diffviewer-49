@@ -4,19 +4,55 @@ import DiffViewer from '../components/DiffViewer';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { Menu } from "lucide-react";
+import { Menu, Share2 } from "lucide-react";
 
 const Index = () => {
-  const [currentContent, setCurrentContent] = useState(() => {
-    return localStorage.getItem('currentContent') || '';
-  });
+  const [currentContent, setCurrentContent] = useState('');
+  const [entries, setEntries] = useState([]);
 
-  const [entries, setEntries] = useState(() => {
-    const savedEntries = localStorage.getItem('timelineEntries');
-    return savedEntries ? JSON.parse(savedEntries) : [
-      { id: 1, timestamp: new Date().toISOString(), content: currentContent }
-    ];
-  });
+  useEffect(() => {
+    const loadFromQueryParams = () => {
+      const params = new URLSearchParams(window.location.search);
+      const sharedData = params.get('sharedData');
+      if (sharedData) {
+        try {
+          const decodedData = JSON.parse(atob(sharedData));
+          setCurrentContent(decodedData.currentContent);
+          setEntries(decodedData.entries);
+          localStorage.setItem('currentContent', decodedData.currentContent);
+          localStorage.setItem('timelineEntries', JSON.stringify(decodedData.entries));
+          // Clear the URL after loading
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (error) {
+          console.error('Error parsing shared data:', error);
+        }
+      } else {
+        // Load from localStorage if no shared data
+        setCurrentContent(localStorage.getItem('currentContent') || '');
+        const savedEntries = localStorage.getItem('timelineEntries');
+        setEntries(savedEntries ? JSON.parse(savedEntries) : [
+          { id: 1, timestamp: new Date().toISOString(), content: '' }
+        ]);
+      }
+    };
+
+    loadFromQueryParams();
+  }, []);
+
+  const shareTimeline = () => {
+    const dataToShare = {
+      currentContent,
+      entries
+    };
+    const encodedData = btoa(JSON.stringify(dataToShare));
+    const shareUrl = `${window.location.origin}${window.location.pathname}?sharedData=${encodedData}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      toast({
+        title: "Share URL Copied",
+        description: "The share URL has been copied to your clipboard.",
+      });
+    });
+  };
 
   const [isTimelineVisible, setIsTimelineVisible] = useState(false);
 
@@ -111,6 +147,15 @@ const Index = () => {
     setSelectedEntry(entry);
   };
 
+  const handleEntryDelete = (id) => {
+    const updatedEntries = entries.filter(entry => entry.id !== id);
+    setEntries(updatedEntries);
+    localStorage.setItem('timelineEntries', JSON.stringify(updatedEntries));
+    if (selectedEntry && selectedEntry.id === id) {
+      setSelectedEntry(null);
+    }
+  };
+
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -119,12 +164,10 @@ const Index = () => {
     };
   }, []);
 
-  const handleSubmit = async (e, isRewrite = false) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const prompt = isRewrite
-        ? `Rewrite the following text:\n\n${currentContent}`
-        : `${currentContent}\n\nUser: ${inputValue}`;
+      const prompt = `Rewrite the following text:\n\n${currentContent}`;
 
       const response = await fetch('https://jyltskwmiwqthebrpzxt.supabase.co/functions/v1/llm', {
         method: 'POST',
@@ -156,21 +199,29 @@ const Index = () => {
           ref={sidebarRef}
           className={`lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-white transform ${isTimelineVisible ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out`}
         >
-          <Timeline entries={entries} onEntrySelect={handleEntrySelect} />
+          <Timeline entries={entries} onEntrySelect={handleEntrySelect} onEntryDelete={handleEntryDelete} />
         </div>
         <div className="hidden lg:block w-64 overflow-y-auto">
           <Timeline entries={entries} onEntrySelect={handleEntrySelect} />
         </div>
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="lg:hidden p-4">
+          <div className="lg:hidden p-4 flex justify-between items-center">
             <Button onClick={toggleTimeline} variant="outline" size="icon">
               <Menu className="h-4 w-4" />
+            </Button>
+            <Button onClick={shareTimeline} variant="outline" size="icon">
+              <Share2 className="h-4 w-4" />
             </Button>
           </div>
           <div className="flex-1 flex overflow-hidden">
             {selectedEntry && (
               <div className="w-1/2 border-r p-4 overflow-y-auto">
-                <h3 className="text-lg font-semibold mb-4">Previous Version</h3>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Previous Version</h3>
+                  <Button onClick={shareTimeline} variant="outline" size="sm">
+                    Share Timeline
+                  </Button>
+                </div>
                 <div className="bg-white shadow-md rounded-md overflow-hidden">
                   <DiffViewer
                     oldContent={selectedEntry.content}
@@ -220,17 +271,16 @@ const Index = () => {
               </div>
             </div>
           </div>
-          <form onSubmit={handleSubmit} className="p-4 bg-white border-t">
+          <form onSubmit={(e) => handleSubmit(e, true)} className="p-4 bg-white border-t">
             <div className="flex space-x-2">
               <Input
                 type="text"
-                placeholder="Enter your question or prompt..."
+                placeholder="Enter a prompt to rewrite the content..."
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 className="flex-1"
               />
-              <Button type="submit">Ask</Button>
-              <Button type="button" onClick={(e) => handleSubmit(e, true)}>Rewrite</Button>
+              <Button type="submit">Rewrite</Button>
             </div>
           </form>
         </div>
