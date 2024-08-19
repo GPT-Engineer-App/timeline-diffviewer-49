@@ -102,7 +102,8 @@ const Index = () => {
     navigator.clipboard.writeText(shareUrl).then(() => {
       toast({
         title: "Share URL Copied",
-        description: "The share URL has been copied to your clipboard.",
+        description: "The share URL has been copied to your clipboard. This URL contains the entire editing history and current content.",
+        duration: 5000,
       });
     });
   };
