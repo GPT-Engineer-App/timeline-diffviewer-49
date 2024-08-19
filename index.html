@@ -2,9 +2,38 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GPT Engineer</title>
+    <title>AI Text Editor</title>
+    <script>
+      (function() {
+        function removeBadge() {
+          const badge = document.getElementById('gpt-engineer-badge');
+          if (badge) {
+            badge.remove();
+          }
+        }
+
+        // Initial check
+        removeBadge();
+
+        // Set up MutationObserver
+        const observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+              mutation.addedNodes.forEach(function(node) {
+                if (node.nodeType === Node.ELEMENT_NODE && node.id === 'gpt-engineer-badge') {
+                  node.remove();
+                }
+              });
+            }
+          });
+        });
+
+        // Start observing the document with the configured parameters
+        observer.observe(document.body, { childList: true, subtree: true });
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
@@ -12,3 +41,4 @@
     <script src="/.gpt_engineer/index.js" type="module"></script>
   </body>
 </html>
+
