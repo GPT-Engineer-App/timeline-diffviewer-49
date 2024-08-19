@@ -112,7 +112,7 @@ const Index = () => {
   const createNewEntry = (newContent) => {
     const newEntries = [
       ...entries,
-      { id: entries.length + 1, timestamp: new Date().toISOString(), content: newContent },
+      { id: Date.now(), timestamp: new Date().toISOString(), content: newContent },
     ];
     setEntries(newEntries);
     localStorage.setItem('timelineEntries', JSON.stringify(newEntries));
@@ -154,6 +154,10 @@ const Index = () => {
     if (selectedEntry && selectedEntry.id === id) {
       setSelectedEntry(null);
     }
+    toast({
+      title: "Entry Deleted",
+      description: "The selected entry has been removed from the timeline.",
+    });
   };
 
   useEffect(() => {
@@ -207,7 +211,7 @@ ${currentContent}`;
           <Timeline entries={entries} onEntrySelect={handleEntrySelect} onEntryDelete={handleEntryDelete} />
         </div>
         <div className="hidden lg:block w-64 overflow-y-auto">
-          <Timeline entries={entries} onEntrySelect={handleEntrySelect} />
+          <Timeline entries={entries} onEntrySelect={handleEntrySelect} onEntryDelete={handleEntryDelete} />
         </div>
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="lg:hidden p-4 flex justify-between items-center">
@@ -276,7 +280,7 @@ ${currentContent}`;
               </div>
             </div>
           </div>
-          <form onSubmit={(e) => handleSubmit(e, true)} className="p-4 bg-white border-t">
+          <form onSubmit={handleSubmit} className="p-4 bg-white border-t">
             <div className="flex space-x-2">
               <Input
                 type="text"

@@ -40,7 +40,10 @@ const Timeline = ({ entries, onEntrySelect, onEntryDelete }) => {
               variant="ghost"
               size="icon"
               className="flex-shrink-0"
-              onClick={() => onEntryDelete(entry.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEntryDelete(entry.id);
+              }}
             >
               <X className="h-4 w-4" />
             </Button>
