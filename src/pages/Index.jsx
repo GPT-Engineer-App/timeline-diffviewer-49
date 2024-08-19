@@ -214,22 +214,26 @@ ${currentContent}`;
           <Timeline entries={entries} onEntrySelect={handleEntrySelect} onEntryDelete={handleEntryDelete} />
         </div>
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="lg:hidden p-4 flex justify-between items-center">
-            <Button onClick={toggleTimeline} variant="outline" size="icon">
-              <Menu className="h-4 w-4" />
-            </Button>
-            <Button onClick={shareTimeline} variant="outline" size="icon">
-              <Share2 className="h-4 w-4" />
-            </Button>
+          <div className="p-4 flex justify-between items-center">
+            <div className="flex space-x-2">
+              <Button onClick={toggleTimeline} variant="outline" size="icon" className="lg:hidden">
+                <Menu className="h-4 w-4" />
+              </Button>
+              <Button onClick={shareTimeline} variant="outline" size="sm">
+                Share Timeline
+              </Button>
+            </div>
+            {selectedEntry && (
+              <Button onClick={() => handleRestore(selectedEntry.content)} variant="outline" size="sm">
+                Restore
+              </Button>
+            )}
           </div>
           <div className="flex-1 flex overflow-hidden">
             {selectedEntry && (
               <div className="w-1/2 border-r p-4 overflow-y-auto">
-                <div className="flex justify-between items-center mb-4">
+                <div className="mb-4">
                   <h3 className="text-lg font-semibold">Previous Version</h3>
-                  <Button onClick={shareTimeline} variant="outline" size="sm">
-                    Share Timeline
-                  </Button>
                 </div>
                 <div className="bg-white shadow-md rounded-md overflow-hidden">
                   <DiffViewer
@@ -241,13 +245,8 @@ ${currentContent}`;
               </div>
             )}
             <div className={`${selectedEntry ? 'w-1/2' : 'w-full'} p-4 flex flex-col`}>
-              <div className="flex justify-between items-center mb-4">
+              <div className="mb-4">
                 <h3 className="text-lg font-semibold">Current Version</h3>
-                {selectedEntry && (
-                  <Button onClick={() => handleRestore(selectedEntry.content)} variant="outline" size="sm">
-                    Restore
-                  </Button>
-                )}
               </div>
               <div className="flex-1 relative bg-white shadow-md rounded-md overflow-hidden">
                 <textarea
