@@ -224,45 +224,42 @@ ${currentContent}`;
           <Timeline entries={entries} onEntrySelect={handleEntrySelect} onEntryDelete={handleEntryDelete} />
         </div>
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="p-4 flex justify-between items-center">
-            <div className="flex space-x-2">
-              <Button onClick={toggleTimeline} variant="outline" size="icon" className="lg:hidden">
-                <Menu className="h-4 w-4" />
-              </Button>
-              <Button onClick={shareTimeline} variant="outline" size="sm">
-                Share Timeline
-              </Button>
-              <Button onClick={handleClearHistory} variant="outline" size="sm">
-                <Trash2 className="h-4 w-4 mr-2" />
-                Clear History
-              </Button>
-            </div>
-            {selectedEntry && (
-              <Button onClick={() => handleRestore(selectedEntry.content)} variant="outline" size="sm">
-                Restore
-              </Button>
-            )}
-          </div>
-          <div className="flex-1 flex overflow-hidden">
-            {selectedEntry && (
-              <div className="w-1/2 border-r p-4 overflow-y-auto">
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold">Previous Version</h3>
+          <div className="p-4">
+            <Button onClick={toggleTimeline} variant="outline" size="icon" className="lg:hidden mb-4">
+              <Menu className="h-4 w-4" />
+            </Button>
+            <div className="flex-1 flex overflow-hidden">
+              {selectedEntry && (
+                <div className="w-1/2 border-r pr-4 overflow-y-auto">
+                  <div className="mb-4 flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Previous Version</h3>
+                    <Button onClick={() => handleRestore(selectedEntry.content)} variant="outline" size="sm">
+                      Restore
+                    </Button>
+                  </div>
+                  <div className="bg-white shadow-md rounded-md overflow-hidden">
+                    <DiffViewer
+                      oldContent={selectedEntry.content}
+                      newContent={currentContent}
+                      showRemoved={true}
+                    />
+                  </div>
                 </div>
-                <div className="bg-white shadow-md rounded-md overflow-hidden">
-                  <DiffViewer
-                    oldContent={selectedEntry.content}
-                    newContent={currentContent}
-                    showRemoved={true}
-                  />
+              )}
+              <div className={`${selectedEntry ? 'w-1/2 pl-4' : 'w-full'} flex flex-col`}>
+                <div className="mb-4 flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">Current Version</h3>
+                  <div className="flex space-x-2">
+                    <Button onClick={shareTimeline} variant="outline" size="sm">
+                      Share Timeline
+                    </Button>
+                    <Button onClick={handleClearHistory} variant="outline" size="sm">
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Clear History
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            )}
-            <div className={`${selectedEntry ? 'w-1/2' : 'w-full'} p-4 flex flex-col`}>
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold">Current Version</h3>
-              </div>
-              <div className="flex-1 relative bg-white shadow-md rounded-md overflow-hidden">
+                <div className="flex-1 relative bg-white shadow-md rounded-md overflow-hidden">
                 <textarea
                   ref={textareaRef}
                   value={currentContent}
