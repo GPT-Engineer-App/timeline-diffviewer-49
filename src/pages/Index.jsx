@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import Timeline from '../components/Timeline';
-import DiffViewer from '../components/DiffViewer';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import TimelineHeader from '../components/TimelineHeader';
+import ContentArea from '../components/ContentArea';
+import PreviousVersionArea from '../components/PreviousVersionArea';
+import RewriteForm from '../components/RewriteForm';
 import { useToast } from "@/components/ui/use-toast";
-import { Menu, Share2, Trash2 } from "lucide-react";
+import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [currentContent, setCurrentContent] = useState('');
@@ -12,6 +14,7 @@ const Index = () => {
   const [isTimelineVisible, setIsTimelineVisible] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const timeoutRef = useRef(null);
   const { toast } = useToast();
   const textareaRef = useRef(null);
@@ -181,6 +184,7 @@ const Index = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const systemPrompt = `You must ONLY answer the new text, that will replace Current text.
 
@@ -208,8 +212,15 @@ ${currentContent}`;
       }
     } catch (error) {
       console.error('Error calling LLM API:', error);
+      toast({
+        title: "Error",
+        description: "Failed to rewrite content. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+      setInputValue('');
     }
-    setInputValue('');
   };
 
   return (
@@ -219,23 +230,11 @@ ${currentContent}`;
           ref={sidebarRef}
           className={`lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-white transform ${isTimelineVisible ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out`}
         >
-          <div className="p-4 flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Timeline</h2>
-            <Button onClick={handleClearHistory} variant="outline" size="sm">
-              <Trash2 className="h-4 w-4 mr-2" />
-              Clear
-            </Button>
-          </div>
+          <TimelineHeader onClearHistory={handleClearHistory} />
           <Timeline entries={entries} onEntrySelect={handleEntrySelect} onEntryDelete={handleEntryDelete} />
         </div>
         <div className="hidden lg:flex lg:flex-col w-64 overflow-y-auto">
-          <div className="p-4 flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Timeline</h2>
-            <Button onClick={handleClearHistory} variant="outline" size="sm">
-              <Trash2 className="h-4 w-4 mr-2" />
-              Clear
-            </Button>
-          </div>
+          <TimelineHeader onClearHistory={handleClearHistory} />
           <Timeline entries={entries} onEntrySelect={handleEntrySelect} onEntryDelete={handleEntryDelete} />
         </div>
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -244,75 +243,27 @@ ${currentContent}`;
               <Menu className="h-4 w-4" />
             </Button>
             <div className="flex-1 flex overflow-hidden">
-              {selectedEntry && (
-                <div className="w-1/2 border-r pr-4 overflow-y-auto flex flex-col">
-                  <div className="mb-4 flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">Previous Version</h3>
-                    <Button onClick={() => handleRestore(selectedEntry.content)} variant="outline" size="sm">
-                      Restore
-                    </Button>
-                  </div>
-                  <div className="flex-1 bg-white shadow-md rounded-md overflow-hidden">
-                    <DiffViewer
-                      oldContent={selectedEntry.content}
-                      newContent={currentContent}
-                      showRemoved={true}
-                    />
-                  </div>
-                </div>
-              )}
-              <div className={`${selectedEntry ? 'w-1/2 pl-4' : 'w-full'} flex flex-col`}>
-                <div className="mb-4 flex justify-between items-center">
-                  <h3 className="text-lg font-semibold">Current Version</h3>
-                  <Button onClick={shareTimeline} variant="outline" size="sm">
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share
-                  </Button>
-                </div>
-                <div className="flex-1 relative bg-white shadow-md rounded-md overflow-hidden">
-                  <textarea
-                    ref={textareaRef}
-                    value={currentContent}
-                    onChange={(e) => handleContentChange(e.target.value)}
-                    className="w-full h-full resize-none outline-none p-2 font-mono text-sm leading-6"
-                    style={{
-                      whiteSpace: 'pre-wrap',
-                      overflowY: 'auto',
-                      overflowX: 'auto',
-                    }}
-                  />
-                  {selectedEntry && (
-                    <div 
-                      ref={overlayRef}
-                      className="absolute inset-0 pointer-events-none overflow-hidden"
-                      style={{
-                        overflowY: 'auto',
-                        overflowX: 'auto',
-                      }}
-                    >
-                      <DiffViewer
-                        oldContent={selectedEntry.content}
-                        newContent={currentContent}
-                        showAdded={true}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
+              <PreviousVersionArea
+                selectedEntry={selectedEntry}
+                currentContent={currentContent}
+                onRestore={handleRestore}
+              />
+              <ContentArea
+                selectedEntry={selectedEntry}
+                currentContent={currentContent}
+                onContentChange={handleContentChange}
+                onShare={shareTimeline}
+                textareaRef={textareaRef}
+                overlayRef={overlayRef}
+              />
             </div>
           </div>
-          <form onSubmit={handleSubmit} className="p-4 bg-white border-t">
-            <div className="flex space-x-2">
-              <Input
-                type="text"
-                placeholder="Enter a prompt to rewrite the content..."
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                className="flex-1"
-              />
-              <Button type="submit">Rewrite</Button>
-            </div>
-          </form>
+          <RewriteForm
+            inputValue={inputValue}
+            onInputChange={setInputValue}
+            onSubmit={handleSubmit}
+            isLoading={isLoading}
+          />
         </div>
       </div>
     </div>
