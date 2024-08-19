@@ -9,6 +9,14 @@ import { Menu, Share2, Trash2 } from "lucide-react";
 const Index = () => {
   const [currentContent, setCurrentContent] = useState('');
   const [entries, setEntries] = useState([]);
+  const [isTimelineVisible, setIsTimelineVisible] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState(null);
+  const [inputValue, setInputValue] = useState('');
+  const timeoutRef = useRef(null);
+  const { toast } = useToast();
+  const textareaRef = useRef(null);
+  const overlayRef = useRef(null);
+  const sidebarRef = useRef(null);
 
   useEffect(() => {
     const loadFromQueryParams = () => {
@@ -21,13 +29,11 @@ const Index = () => {
           setEntries(decodedData.entries);
           localStorage.setItem('currentContent', decodedData.currentContent);
           localStorage.setItem('timelineEntries', JSON.stringify(decodedData.entries));
-          // Clear the URL after loading
           window.history.replaceState({}, document.title, window.location.pathname);
         } catch (error) {
           console.error('Error parsing shared data:', error);
         }
       } else {
-        // Load from localStorage if no shared data
         setCurrentContent(localStorage.getItem('currentContent') || '');
         const savedEntries = localStorage.getItem('timelineEntries');
         setEntries(savedEntries ? JSON.parse(savedEntries) : [
@@ -38,31 +44,6 @@ const Index = () => {
 
     loadFromQueryParams();
   }, []);
-
-  const shareTimeline = () => {
-    const dataToShare = {
-      currentContent,
-      entries
-    };
-    const encodedData = encodeURIComponent(JSON.stringify(dataToShare));
-    const shareUrl = `${window.location.origin}${window.location.pathname}?sharedData=${encodedData}`;
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      toast({
-        title: "Share URL Copied",
-        description: "The share URL has been copied to your clipboard.",
-      });
-    });
-  };
-
-  const [isTimelineVisible, setIsTimelineVisible] = useState(false);
-
-  const toggleTimeline = () => {
-    setIsTimelineVisible(!isTimelineVisible);
-  };
-
-  const textareaRef = useRef(null);
-  const overlayRef = useRef(null);
-  const sidebarRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -76,6 +57,18 @@ const Index = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isTimelineVisible]);
+
+  useEffect(() => {
+    localStorage.setItem('currentContent', currentContent);
+  }, [currentContent]);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const syncScroll = useCallback(() => {
     if (textareaRef.current && overlayRef.current) {
@@ -95,10 +88,25 @@ const Index = () => {
   useLayoutEffect(() => {
     syncScroll();
   }, [currentContent, syncScroll]);
-  const [selectedEntry, setSelectedEntry] = useState(null);
-  const [inputValue, setInputValue] = useState('');
-  const timeoutRef = useRef(null);
-  const { toast } = useToast();
+
+  const shareTimeline = () => {
+    const dataToShare = {
+      currentContent,
+      entries
+    };
+    const encodedData = encodeURIComponent(JSON.stringify(dataToShare));
+    const shareUrl = `${window.location.origin}${window.location.pathname}?sharedData=${encodedData}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      toast({
+        title: "Share URL Copied",
+        description: "The share URL has been copied to your clipboard.",
+      });
+    });
+  };
+
+  const toggleTimeline = () => {
+    setIsTimelineVisible(!isTimelineVisible);
+  };
 
   const handleRestore = (content) => {
     setCurrentContent(content);
@@ -117,10 +125,6 @@ const Index = () => {
     setEntries(newEntries);
     localStorage.setItem('timelineEntries', JSON.stringify(newEntries));
   };
-
-  useEffect(() => {
-    localStorage.setItem('currentContent', currentContent);
-  }, [currentContent]);
 
   const handleContentChange = (newContent) => {
     setCurrentContent(newContent);
@@ -169,14 +173,6 @@ const Index = () => {
       description: "All timeline entries have been removed.",
     });
   };
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -251,6 +247,7 @@ ${currentContent}`;
                   <h3 className="text-lg font-semibold">Current Version</h3>
                   <div className="flex space-x-2">
                     <Button onClick={shareTimeline} variant="outline" size="sm">
+                      <Share2 className="h-4 w-4 mr-2" />
                       Share Timeline
                     </Button>
                     <Button onClick={handleClearHistory} variant="outline" size="sm">
@@ -260,33 +257,34 @@ ${currentContent}`;
                   </div>
                 </div>
                 <div className="flex-1 relative bg-white shadow-md rounded-md overflow-hidden">
-                <textarea
-                  ref={textareaRef}
-                  value={currentContent}
-                  onChange={(e) => handleContentChange(e.target.value)}
-                  className="w-full h-full resize-none outline-none p-2 font-mono text-sm leading-6"
-                  style={{
-                    whiteSpace: 'pre-wrap',
-                    overflowY: 'auto',
-                    overflowX: 'auto',
-                  }}
-                />
-                {selectedEntry && (
-                  <div 
-                    ref={overlayRef}
-                    className="absolute inset-0 pointer-events-none overflow-hidden"
+                  <textarea
+                    ref={textareaRef}
+                    value={currentContent}
+                    onChange={(e) => handleContentChange(e.target.value)}
+                    className="w-full h-full resize-none outline-none p-2 font-mono text-sm leading-6"
                     style={{
+                      whiteSpace: 'pre-wrap',
                       overflowY: 'auto',
                       overflowX: 'auto',
                     }}
-                  >
-                    <DiffViewer
-                      oldContent={selectedEntry.content}
-                      newContent={currentContent}
-                      showAdded={true}
-                    />
-                  </div>
-                )}
+                  />
+                  {selectedEntry && (
+                    <div 
+                      ref={overlayRef}
+                      className="absolute inset-0 pointer-events-none overflow-hidden"
+                      style={{
+                        overflowY: 'auto',
+                        overflowX: 'auto',
+                      }}
+                    >
+                      <DiffViewer
+                        oldContent={selectedEntry.content}
+                        newContent={currentContent}
+                        showAdded={true}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
