@@ -4,7 +4,7 @@ import DiffViewer from '../components/DiffViewer';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { Menu, Share2 } from "lucide-react";
+import { Menu, Share2, Trash2 } from "lucide-react";
 
 const Index = () => {
   const [currentContent, setCurrentContent] = useState('');
@@ -160,6 +160,16 @@ const Index = () => {
     });
   };
 
+  const handleClearHistory = () => {
+    setEntries([]);
+    setSelectedEntry(null);
+    localStorage.removeItem('timelineEntries');
+    toast({
+      title: "History Cleared",
+      description: "All timeline entries have been removed.",
+    });
+  };
+
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -221,6 +231,10 @@ ${currentContent}`;
               </Button>
               <Button onClick={shareTimeline} variant="outline" size="sm">
                 Share Timeline
+              </Button>
+              <Button onClick={handleClearHistory} variant="outline" size="sm">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Clear History
               </Button>
             </div>
             {selectedEntry && (
