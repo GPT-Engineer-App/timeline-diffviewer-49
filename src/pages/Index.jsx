@@ -167,7 +167,11 @@ const Index = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const prompt = `Rewrite the following text:\n\n${currentContent}`;
+      const systemPrompt = `You must ONLY answer the new text, that will replace Current text.
+
+Current text:
+${currentContent}`;
+      const userPrompt = inputValue;
 
       const response = await fetch('https://jyltskwmiwqthebrpzxt.supabase.co/functions/v1/llm', {
         method: 'POST',
@@ -177,7 +181,8 @@ const Index = () => {
         },
         body: JSON.stringify({
           messages: [
-            { role: "user", content: prompt }
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
           ]
         }),
       });
