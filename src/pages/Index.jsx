@@ -129,6 +129,11 @@ const Index = () => {
   const handleContentChange = (newContent) => {
     setCurrentContent(newContent);
 
+    if (entries.length === 0) {
+      createNewEntry(newContent);
+      return;
+    }
+
     const lastEntry = entries[entries.length - 1];
     const charDiff = Math.abs(newContent.length - lastEntry.content.length);
 
