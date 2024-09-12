@@ -41,14 +41,14 @@ ${currentContent}`;
           'Content-Type': 'application/json',
           'anthropic-version': '2023-06-01',
         },
-        JSON.stringify({
+        {
           model: 'claude-3-opus-20240229',
           max_tokens: 1024,
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
           ]
-        })
+        }
       );
 
       if (response.content && response.content[0] && response.content[0].text) {
