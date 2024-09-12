@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Timeline from '../components/Timeline';
 import TimelineHeader from '../components/TimelineHeader';
 import ContentArea from '../components/ContentArea';
@@ -7,19 +7,23 @@ import RewriteForm from '../components/RewriteForm';
 import { useToast } from "@/components/ui/use-toast";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTimelineEntries } from '../hooks/useTimelineEntries';
+import { useContentSync } from '../hooks/useContentSync';
+import { useAnthropicAPI } from '../hooks/useAnthropicAPI';
 
 const Index = () => {
   const [currentContent, setCurrentContent] = useState('');
-  const [entries, setEntries] = useState([]);
   const [isTimelineVisible, setIsTimelineVisible] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const timeoutRef = useRef(null);
   const { toast } = useToast();
   const textareaRef = useRef(null);
   const overlayRef = useRef(null);
   const sidebarRef = useRef(null);
+
+  const { entries, createNewEntry, handleEntryDelete, handleClearHistory } = useTimelineEntries(currentContent);
+  const { syncScroll } = useContentSync(textareaRef, overlayRef);
+  const { isLoading, callAnthropicAPI } = useAnthropicAPI();
 
   useEffect(() => {
     const loadFromQueryParams = () => {
@@ -29,19 +33,13 @@ const Index = () => {
         try {
           const decodedData = JSON.parse(decodeURIComponent(sharedData));
           setCurrentContent(decodedData.currentContent);
-          setEntries(decodedData.entries);
-          localStorage.setItem('currentContent', decodedData.currentContent);
-          localStorage.setItem('timelineEntries', JSON.stringify(decodedData.entries));
+          createNewEntry(decodedData.currentContent);
           window.history.replaceState({}, document.title, window.location.pathname);
         } catch (error) {
           console.error('Error parsing shared data:', error);
         }
       } else {
         setCurrentContent(localStorage.getItem('currentContent') || '');
-        const savedEntries = localStorage.getItem('timelineEntries');
-        setEntries(savedEntries ? JSON.parse(savedEntries) : [
-          { id: 1, timestamp: new Date().toISOString(), content: '' }
-        ]);
       }
     };
 
@@ -64,33 +62,6 @@ const Index = () => {
   useEffect(() => {
     localStorage.setItem('currentContent', currentContent);
   }, [currentContent]);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  const syncScroll = useCallback(() => {
-    if (textareaRef.current && overlayRef.current) {
-      overlayRef.current.scrollTop = textareaRef.current.scrollTop;
-      overlayRef.current.scrollLeft = textareaRef.current.scrollLeft;
-    }
-  }, []);
-
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.addEventListener('scroll', syncScroll);
-      return () => textarea.removeEventListener('scroll', syncScroll);
-    }
-  }, [syncScroll]);
-
-  useLayoutEffect(() => {
-    syncScroll();
-  }, [currentContent, syncScroll]);
 
   const shareTimeline = () => {
     const dataToShare = {
@@ -121,105 +92,29 @@ const Index = () => {
     });
   };
 
-  const createNewEntry = (newContent) => {
-    const newEntries = [
-      ...entries,
-      { id: Date.now(), timestamp: new Date().toISOString(), content: newContent },
-    ];
-    setEntries(newEntries);
-    localStorage.setItem('timelineEntries', JSON.stringify(newEntries));
-  };
-
   const handleContentChange = (newContent) => {
     setCurrentContent(newContent);
-
-    if (entries.length === 0) {
-      createNewEntry(newContent);
-      return;
-    }
-
-    const lastEntry = entries[entries.length - 1];
-    const charDiff = Math.abs(newContent.length - lastEntry.content.length);
-
-    if (charDiff > 30) {
-      createNewEntry(newContent);
-    } else {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      timeoutRef.current = setTimeout(() => {
-        if (newContent !== lastEntry.content) {
-          createNewEntry(newContent);
-        }
-      }, 1000);
-    }
+    createNewEntry(newContent);
   };
 
   const handleEntrySelect = (entry) => {
     setSelectedEntry(entry);
   };
 
-  const handleEntryDelete = (id) => {
-    const updatedEntries = entries.filter(entry => entry.id !== id);
-    setEntries(updatedEntries);
-    localStorage.setItem('timelineEntries', JSON.stringify(updatedEntries));
-    if (selectedEntry && selectedEntry.id === id) {
-      setSelectedEntry(null);
-    }
-    toast({
-      title: "Entry Deleted",
-      description: "The selected entry has been removed from the timeline.",
-    });
-  };
-
-  const handleClearHistory = () => {
-    setEntries([]);
-    setSelectedEntry(null);
-    localStorage.removeItem('timelineEntries');
-    toast({
-      title: "History Cleared",
-      description: "All timeline entries have been removed.",
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     try {
-      const systemPrompt = `You must ONLY answer the new text, that will replace Current text.
-
-Current text:
-${currentContent}`;
-      const userPrompt = inputValue;
-
-      const response = await fetch('https://jyltskwmiwqthebrpzxt.supabase.co/functions/v1/llm', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5bHRza3dtaXdxdGhlYnJwenh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjIxNTA2NjIsImV4cCI6MjAzNzcyNjY2Mn0.a1y6NavG5JxoGJCNrAckAKMvUDaXAmd2Ny0vMvz-7Ng',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt }
-          ]
-        }),
-      });
-      const data = await response.json();
-      if (data.content && data.content[0] && data.content[0].text) {
-        setCurrentContent(data.content[0].text);
-        createNewEntry(data.content[0].text);
-      }
+      const newContent = await callAnthropicAPI(currentContent, inputValue);
+      setCurrentContent(newContent);
+      createNewEntry(newContent);
     } catch (error) {
-      console.error('Error calling LLM API:', error);
+      console.error('Error calling Anthropic API:', error);
       toast({
         title: "Error",
         description: "Failed to rewrite content. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
       setInputValue('');
     }
   };
