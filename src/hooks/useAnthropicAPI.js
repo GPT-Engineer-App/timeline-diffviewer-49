@@ -56,6 +56,9 @@ ${currentContent}`;
       } else {
         throw new Error('Unexpected response format from Anthropic API');
       }
+    } catch (error) {
+      console.error('Error calling Anthropic API:', error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
