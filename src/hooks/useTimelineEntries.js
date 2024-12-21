@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { throttle } from 'lodash';
 
 export const useTimelineEntries = (currentContent) => {
   const [entries, setEntries] = useState([]);
@@ -10,16 +11,20 @@ export const useTimelineEntries = (currentContent) => {
     ]);
   }, []);
 
-  const createNewEntry = (newContent) => {
-    if (entries.length === 0 || newContent !== entries[entries.length - 1].content) {
-      const newEntries = [
-        ...entries,
-        { id: Date.now(), timestamp: new Date().toISOString(), content: newContent },
-      ];
-      setEntries(newEntries);
-      localStorage.setItem('timelineEntries', JSON.stringify(newEntries));
-    }
-  };
+  // Throttle the creation of new entries to once every 2 seconds
+  const createNewEntry = useCallback(
+    throttle((newContent) => {
+      if (entries.length === 0 || newContent !== entries[entries.length - 1].content) {
+        const newEntries = [
+          ...entries,
+          { id: Date.now(), timestamp: new Date().toISOString(), content: newContent },
+        ];
+        setEntries(newEntries);
+        localStorage.setItem('timelineEntries', JSON.stringify(newEntries));
+      }
+    }, 2000),
+    [entries]
+  );
 
   const handleEntryDelete = (id) => {
     const updatedEntries = entries.filter(entry => entry.id !== id);
